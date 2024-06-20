@@ -3,6 +3,8 @@ import React from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { AdminStackParams } from '../../navigation/AdminStackNav'
 import { StatusBar } from 'expo-status-bar'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../redux/store'
 
 type PanelProps = NativeStackScreenProps<AdminStackParams>
 
@@ -10,12 +12,13 @@ const AdminPanel = ({ navigation }: PanelProps) => {
 
     const dimensions = Dimensions.get("screen")
 
+    const restaurantName = useSelector((state:RootState) => state.admin.admin.name)
+
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f4e285' }}>
             <StatusBar animated={true} backgroundColor='#f0a202' />
-
             <Text style={{ fontStyle: 'italic', fontSize: 40, fontWeight: 'bold', shadowOffset: { height: 5, width: 5 }, shadowColor: 'gray', shadowOpacity: 1, margin: 10 }}>
-                MY PLACE
+                {restaurantName}
             </Text>
             <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity onPress={() => navigation.navigate('PhotoGallery')} style={{ borderRadius: 10, margin: 10, backgroundColor: '#f0a202', width: dimensions.width / 2.5, height: dimensions.height / 5, justifyContent: 'center', alignItems: 'center' }}>

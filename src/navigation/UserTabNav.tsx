@@ -19,22 +19,25 @@ const UserTabNav = () => {
             <Tab.Screen name="HomeStackNav" component={HomeStackNav} options={{
                 tabBarLabel: "Home",
                 tabBarLabelStyle: { fontSize: 14 },
+                tabBarActiveTintColor:'#f0a202',
                 tabBarIcon: () => (
-                    <AntDesign name="home" size={24} color="black" />
+                    <AntDesign name="home" size={24} color="#f0a202" />
                 ),
             }} />
             <Tab.Screen name="FavoriteStackNav" component={FavoriteStackNav} options={{
                 tabBarLabel: "Favorites",
                 tabBarLabelStyle: { fontSize: 14 },
+                tabBarActiveTintColor:'#f0a202',
                 tabBarIcon: () => (
-                    <MaterialIcons name="favorite-outline" size={24} color="black" />
+                    <MaterialIcons name="favorite-outline" size={24} color="#f0a202" />
                 )
             }} />
             <Tab.Screen name="ReservationStackNav" component={ReservationStackNav} options={{
                 tabBarLabel: "Reservations",
                 tabBarLabelStyle: { fontSize: 14 },
+                tabBarActiveTintColor:'#f0a202',
                 tabBarIcon: () => (
-                    <Feather name="book-open" size={24} color="black" />
+                    <Feather name="book-open" size={24} color="#f0a202" />
                 )
             }} />
         </Tab.Navigator>

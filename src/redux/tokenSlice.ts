@@ -1,4 +1,3 @@
-// tokenSlice.ts
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
@@ -22,7 +21,7 @@ const tokenSlice = createSlice({
     },
     clearToken(state) {
       state.token = null; // Tokenı temizlemek için action
-      state.role = null
+      state.role = null;
     },
   },
 });

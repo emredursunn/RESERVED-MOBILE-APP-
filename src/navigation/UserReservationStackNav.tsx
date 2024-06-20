@@ -10,7 +10,6 @@ export type ReservationStackParams = {
     DetailedPlace: {
         id: number
     },
-    Menu: undefined,
     Login: undefined
 }
 
@@ -18,11 +17,10 @@ const ReservationStack = createNativeStackNavigator<ReservationStackParams>()
 
 const ReservationStackNav = () => {
     return (
-        <ReservationStack.Navigator initialRouteName='Reservations' screenOptions={{ headerShown: false }}>
-            <ReservationStack.Screen name='Reservations' component={Reservations} />
-            <ReservationStack.Screen name='DetailedPlace' component={DetailedPlace} />
-            <ReservationStack.Screen name='Menu' component={Menu} />
-            <ReservationStack.Screen name='Login' component={LoginScreen} />
+        <ReservationStack.Navigator initialRouteName='Reservations'  screenOptions={{headerShown:true, headerStyle:{backgroundColor:'#f0a202'}, headerTitleAlign:'center'}}>
+            <ReservationStack.Screen name='Reservations' component={Reservations} options={{headerTitle:'My Reservations'}} />
+            <ReservationStack.Screen name='DetailedPlace' component={DetailedPlace} options={{headerTitle:'Venue'}} />
+            <ReservationStack.Screen name='Login' component={LoginScreen} options={{headerTitle:'Login'}} />
         </ReservationStack.Navigator>
     )
 }

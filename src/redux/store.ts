@@ -2,19 +2,21 @@
 import { configureStore } from '@reduxjs/toolkit';
 import tokenReducer from './tokenSlice';
 import reservationReducer from './reservationSlice';
-import requestReducer from './requestSlice';
 import menuReducer from './MenuSlice'
 import galleryReducer from './gallerySlice';
 import favoritesReducer from './favoriteSlice';
+import adminReducer from './adminSlice';
+import userReducer from './userSlice';
 
 const store = configureStore({
   reducer: {
     token: tokenReducer,
     reservation: reservationReducer,
-    request: requestReducer,
     menu: menuReducer,
     gallery: galleryReducer,
-    favorite: favoritesReducer
+    favorite: favoritesReducer,
+    admin:adminReducer,
+    user:userReducer,
   },
 });
 

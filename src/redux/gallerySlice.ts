@@ -1,109 +1,136 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { RootState } from './store';
+import { BASE_URL, formatImageUrl } from '../utils/utils';
+import { Platform } from 'react-native';
 
 export type GalleryState = {
-    cover: string,
-    gallery: string[]
+  gallery: Array<string | null>
 }
-
-export type galleryPayload = {
-    index: number,
-    value: string
-}
-
 
 const initialState: GalleryState = {
-    cover: "",
-    gallery: ["", "", "", ""]
+  gallery: [null, null, null, null, null]
 }
-
-
-const BASE_URL = "http://192.168.1.126/mobile_reservation_backend"
 
 
 export const getImagesFromGalleryAsync = createAsyncThunk(
-    'my-images',
-    async (token: string) => {
-        // Axios ile asenkron işlemi gerçekleştir
-
-        const response = await axios.get(`${BASE_URL}/api/admin/restaurant/my-images`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-        console.log(response.data)
-        return response.data;
-    }
-);
-
-export const addImageToGalleryAsync = createAsyncThunk(
-    'gallery/addImageToGallery',
-    async ({ cover, gallery, token }: { cover: string; gallery: string[]; token: string }) => {
-
-        try {
-            const formData = new FormData();
-
-            // Append cover image
-
-            formData.append('image_cover', cover);
-            // Append gallery images
-            gallery.forEach(async (imageUri, index) => {
-                formData.append(`image${index + 1}`, imageUri);
-            });
-            // Log FormData
-            console.log("FormData:", formData);
-
-            const response = await axios.post(`${BASE_URL}/api/admin/restaurant/images`, formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data',
-                }
-            });
-            console.log(response.data);
-            return response.data;
-
-        } catch (error) {
-            console.log("hata:", error);
+  'get-images',
+  async (token: string) => {
+    const response = await axios.get(`${BASE_URL}/api/admin/restaurant/my-images`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-    }
-);
-export const removeFromGalleryAsync = createAsyncThunk(
-    'delete-images',
-    async (index: number) => {
-        // Axios ile asenkron işlemi gerçekleştir
-        const response = await axios.delete(`${BASE_URL}/api/admin/restaurant/images${index}`);
-        return response.data;
-    }
+      });
+    const { image_cover, image1, image2, image3, image4 } = response.data.data;
+
+    return [
+      formatImageUrl(image_cover),
+      formatImageUrl(image1),
+      formatImageUrl(image2),
+      formatImageUrl(image3),
+      formatImageUrl(image4),
+    ] as Array<string | null>
+  }
 );
 
+export const storeImagesToGalleryAsync = createAsyncThunk(
+  'store-images',
+  async ({ gallery, token }: { gallery: Array<string | null>; token: string }) => {
+    const sendRequest = async () => {
+      const formData = new FormData();
+      console.log("gallery", gallery);
+      for (let i = 0; i <= 4; i++) {
+        let uri = gallery[i];
+        if (uri) {
+          let filename = uri.split('/').pop();
+          let match = /\.(\w+)$/.exec(filename as string);
+          let type = match ? `image/${match[1]}` : `image`;
+          let fileData = {
+            uri: Platform.select({ ios: uri.replace('file://', ''), android: uri }),
+            name: filename,
+            type: type,
+          };
+          if (i === 0) {
+            formData.append('image_cover', fileData as any);
+          } else {
+            formData.append(`image${i}`, fileData as any);
+          }
+        }
+      }
+      console.log("FormData:");
+
+      const response = await axios.post(`${BASE_URL}/api/admin/restaurant/images`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response;
+    };
+
+    try {
+      const response = await sendRequest();
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.log("First attempt failed, retrying...");
+      try {
+        const response = await sendRequest();
+        console.log(response.data);
+        return response.data;
+      } catch (error) {
+        console.log("Second attempt failed:", error);
+        throw error;
+      }
+    }
+  }
+);
+
+export const removeFromGalleryAsync = createAsyncThunk(
+  'delete-images',
+  async (index: number) => {
+    // Axios ile asenkron işlemi gerçekleştir
+    try {
+      const response = await axios.delete(`${BASE_URL}/api/admin/restaurant/images${index}`);
+      console.log(response.data);
+      return index
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+);
 
 
 const gallerySlice = createSlice({
-    name: 'gallery',
-    initialState,
-    reducers: {
+  name: 'gallery',
+  initialState,
+  reducers: {
+    addImage: (state, action: PayloadAction<{ uri: string, index: number }>) => {
+      const { uri, index } = action.payload
+      state.gallery[index] = uri
+    },
+    deleteImage: (state, action: PayloadAction<number>) => {
+      const index = action.payload
+      state.gallery[index] = null
+    } 
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(storeImagesToGalleryAsync.fulfilled, (state, action) => {
 
-    },
-    extraReducers: (builder) => {
-        builder
-            .addCase(addImageToGalleryAsync.fulfilled, (state, action) => {
-                // Assuming the response data contains updated gallery information
-                // state.gallery = action.payload.gallery;
-                // state.cover = action.payload.cover;
-            })
-            .addCase(removeFromGalleryAsync.fulfilled, (state, action) => {
-                const index = action.meta.arg;
-                state.gallery[index] = "";
-            })
-            .addCase(getImagesFromGalleryAsync.fulfilled, (state, action) => {
-                // Assuming the response data contains gallery images
-                state.gallery = action.payload.gallery;
-                state.cover = action.payload.cover;
-            });
-    },
+      })
+      .addCase(removeFromGalleryAsync.fulfilled, (state, action: PayloadAction<number>) => {
+        const index = action.payload
+        state.gallery[index] = null;
+      })
+      .addCase(getImagesFromGalleryAsync.fulfilled, (state, action) => {
+        state.gallery = action.payload;
+        console.log(action.payload)
+      });
+  },
 
 });
 
+export const { addImage, deleteImage } = gallerySlice.actions;
 export default gallerySlice.reducer;

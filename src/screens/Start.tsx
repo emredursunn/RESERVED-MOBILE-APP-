@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { AuthStackParams } from '../navigation/AuthStackNav'
 import Loading from '../components/Loading'
+import { getAllPlaces } from '../utils/utils'
 
 type Props = NativeStackScreenProps<AuthStackParams>
 

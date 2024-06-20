@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { AuthStackParams } from '../../navigation/AuthStackNav'
@@ -6,32 +6,45 @@ import axios from 'axios'
 import { setToken } from '../../redux/tokenSlice'
 import { useDispatch } from 'react-redux'
 import { RadioGroup } from 'react-native-radio-buttons-group'
+import { BASE_URL } from '../../utils/utils'
+import { Admin, setAdmin } from '../../redux/adminSlice'
+import { User, setUser } from '../../redux/userSlice'
 
 type Props = NativeStackScreenProps<AuthStackParams>
 
 const LoginScreen = ({ navigation }: Props) => {
-    const [email, setEmail] = useState("emre@gmail.com")
+    //test10 admin
+    //example4 user
+    const [email, setEmail] = useState("example2@gmail.com")
     const [password, setPassword] = useState("123456")
     const [isLoading, setIsLoading] = useState(false)
-    const [role, setRole] = useState("")
-
-
-    const BASE_URL = "http://192.168.1.126/mobile_reservation_backend"
+    const [selectedRole, setSelectedRole] = useState("")
 
     const dispatch = useDispatch()
 
     const handleLogin = async () => {
         setIsLoading(true)
         try {
-            const response = await axios.post(`${BASE_URL}/api/auth/${role}`, {
+            const response = await axios.post(`${BASE_URL}/api/auth/${selectedRole}`, {
                 "email": email,
                 "password": password
             })
-            console.log(response.data)
-            const responsed_token = response.data.token
-            const responsed_role = response.data.role
-            dispatch(setToken({token:responsed_token,role:responsed_role}))
+            const token = response.data.token
+            const role = response.data.role
+            if (role === 1) {
+                const response2 = await axios.get(`${BASE_URL}/api/admin/restaurant/myRestaurant`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                const adminData: Admin = response2.data.data
+                dispatch(setAdmin(adminData))
+            } else {
+                const userData: User = response.data.user
+                dispatch(setUser(userData))
+            }
             setIsLoading(false)
+            dispatch(setToken({ token: token, role: role }))
         } catch (error) {
             setIsLoading(false)
             console.log(error)
@@ -52,7 +65,7 @@ const LoginScreen = ({ navigation }: Props) => {
     ]
 
     return (
-        <View style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={{ flex: 3, justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ fontSize: 60, fontWeight: 'bold', shadowOffset: { height: 5, width: 5 }, shadowColor: 'gray', shadowOpacity: 1, }}>RESERVED</Text>
                 <Text style={{ fontSize: 18 }}>Sign in to your account</Text>
@@ -62,8 +75,8 @@ const LoginScreen = ({ navigation }: Props) => {
                 <TextInput value={password} onChangeText={setPassword} placeholder='Password' style={{ width: '70%', borderWidth: 1, borderRadius: 20, padding: 20, shadowOffset: { height: 2, width: 0 }, shadowColor: 'gray', shadowOpacity: 1, marginBottom: 10 }} />
                 <RadioGroup
                     radioButtons={radioButtons}
-                    onPress={setRole}
-                    selectedId={role}
+                    onPress={setSelectedRole}
+                    selectedId={selectedRole}
                     containerStyle={{ flexDirection: 'row' }}
                 />
                 {isLoading ?
@@ -76,11 +89,11 @@ const LoginScreen = ({ navigation }: Props) => {
                     </TouchableOpacity>
                 }
             </View>
-            <View style={{ flex: 1, alignItems:'center' }}>
-                <TouchableOpacity style={{marginVertical:25 }}>
-                    <Text style={{ paddingHorizontal:10}}>Forgot your password?</Text>
+            <View style={{ flex: 1, alignItems: 'center' }}>
+                <TouchableOpacity style={{ marginVertical: 25 }}>
+                    <Text style={{ paddingHorizontal: 10 }}>Forgot your password?</Text>
                 </TouchableOpacity>
-                <View style={{flexDirection:'row', paddingHorizontal:10}}>
+                <View style={{ flexDirection: 'row', paddingHorizontal: 10 }}>
                     <Text>
                         Don't have an account?
                     </Text>
@@ -92,7 +105,7 @@ const LoginScreen = ({ navigation }: Props) => {
                 </View>
 
             </View>
-        </View>
+        </ScrollView>
     )
 }
 

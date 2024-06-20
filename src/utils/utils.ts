@@ -1,20 +1,49 @@
 import axios from "axios";
-import { CategoryCardProps } from "../components/CategoryCard";
 import { PlaceCardProps } from "../components/PlaceCard";
-import { useState } from "react";
+import { DetailedPlace } from "../screens/CustomerScreens/DetailedPlace";
 
-export const menuCategories = [
-    { key: '0', value: 'FOODS' },
-    { key: '1', value: 'DRINKS' },
-    { key: '2', value: 'ALCOHOLS' },
-    { key: '3', value: 'OTHERS' }
-]
 
-const BASE_URL = "http://192.168.1.126/mobile_reservation_backend"
-type Category = {
+//export const BASE_URL = "http://192.168.1.135/mobile_reservation_backend"
+//export const BASE_URL = "http://192.168.1.34/mobile_reservation_backend"
+export const BASE_URL = "http://reservation.mava.systems"
+
+
+interface DataItem {
+    id: number;
+    name: string;
+    created_at?: Date | null;
+    deleted_at?: Date | null;
+    updated_at?: Date | null;
+}
+
+export type Category = {
     key: number,
     value: string
 }
+
+export const categoryPhotos = ["https://cdn4.vectorstock.com/i/1000x1000/80/53/disco-dancing-people-vector-18808053.jpg",
+    "https://www.tastingtable.com/img/gallery/most-luxurious-expensive-airline-meals/image-import.jpg",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ44oCqe83N68WUnCBXvKbR-hqCv-kBF4Vq_A&s",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTcFDCRNfqSTyb2ia-W7KAGKlMySVEc-T5Qw&s",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKeUCSmnpmoYp5MtECZA2NdX3MYAHTnTnCoQ&s",
+    "https://www.tastingtable.com/img/gallery/most-luxurious-expensive-airline-meals/image-import.jpg"
+]
+
+
+export const getMenuCategories = async () => {
+    try {
+        const response = await axios.get(`${BASE_URL}/api/restaurant/product-type`)
+        const data: DataItem[] = response.data.data
+        return data.map(item => ({
+            key: item.id - 1,
+            value: item.name
+        }));
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
 export const getPlaceCategories = async () => {
     try {
         const response = await axios.get(`${BASE_URL}/api/restaurant/category`)
@@ -31,41 +60,95 @@ export const getPlaceCategories = async () => {
 }
 
 
-const maison = { id: 0, categoryId: 0, name: "No 62 Pub", stars: 4, cover: "https://gopos.com.tr/wp-content/uploads/2019/11/Bar-açarken-nelere-dikat-etmeli-1.jpg" };
-const kumbarahall = { id: 1, categoryId: 0, name: "Kumbara Hall", stars: 3, cover: "https://media-cdn.tripadvisor.com/media/photo-s/19/e8/5e/5f/wave-bar.jpg" };
-const restplus = { id: 2, categoryId: 0, name: "Rest Plus", stars: 5, cover: "https://c4.wallpaperflare.com/wallpaper/961/657/229/disco-disco-music-disko-dancing-4k-ultra-hd-wallpaper-for-desktop-laptop-tablet-mobile-phones-and-tv-3840×2400-wallpaper-preview.jpg" };
+export const formatImageUrl = (imagePath: string | null) => {
+    if (BASE_URL.toString() === "http://reservation.mava.systems".toString()) {
+        return imagePath ? `${BASE_URL}/storage/${imagePath}` : null;
+    } else {
+        return imagePath ? `${BASE_URL}/storage/app/public/${imagePath}` : null;
+    }
+};
 
-const efsanepide = { id: 3, categoryId: 1, name: "Efsane Pide", stars: 4, cover: "https://gopos.com.tr/wp-content/uploads/2019/11/Bar-açarken-nelere-dikat-etmeli-1.jpg" };
-const kebapciokkes = { id: 4, categoryId: 1, name: "Kebapçı Ökkeş", stars: 4, cover: "https://media-cdn.tripadvisor.com/media/photo-s/19/e8/5e/5f/wave-bar.jpg" };
-const kofteciyusuf = { id: 5, categoryId: 1, name: "Köfteci Yusuf", stars: 5, cover: "https://c4.wallpaperflare.com/wallpaper/961/657/229/disco-disco-music-disko-dancing-4k-ultra-hd-wallpaper-for-desktop-laptop-tablet-mobile-phones-and-tv-3840×2400-wallpaper-preview.jpg" };
+export const getAllPlaces = async () => {
+    try {
+        const response = await axios.get(`${BASE_URL}/api/restaurant/list`)
+        const data = response.data.data
+        const placeList: PlaceCardProps[] = data.map((place: any) => {
+            return {
+                id: place.id,
+                categoryId: place.category_id,
+                name: place.name,
+                star_count: place.reviews_count > 0 ? Math.floor(place.star_count_total / place.reviews_count) : 0,
+                image_cover: place.image_cover,
+                address: place.address
+            } as PlaceCardProps
+        })
+        return categorizePlaces(placeList)
+    } catch (error) {
+        console.log("getall",error)
+        throw error
+    }
+}
 
-const kukla = { id: 6, categoryId: 2, name: "Kukla Pub", stars: 3, cover: "https://gopos.com.tr/wp-content/uploads/2019/11/Bar-açarken-nelere-dikat-etmeli-1.jpg" };
-const momo: PlaceCardProps = { id: 7, categoryId: 2, name: "Momo by Rest", stars: 2, cover: "https://media-cdn.tripadvisor.com/media/photo-s/19/e8/5e/5f/wave-bar.jpg", reviews: [{ id: 0, userId: 0, comment: "Excellent!!!.", stars: 5, placeId: 7 }, { id: 1, userId: 0, comment: "What a great night!.", stars: 4, placeId: 7 }, { id: 2, userId: 0, comment: "Disgusting...", stars: 1, placeId: 7 }, { id: 3, userId: 0, comment: "Not bad.", stars: 3, placeId: 7 }, { id: 4, userId: 0, comment: "Çok güzel bir geceydi.", stars: 3, placeId: 7 }] };
-const hollystone = { id: 8, categoryId: 2, name: "Holly Stone", stars: 3, cover: "https://c4.wallpaperflare.com/wallpaper/961/657/229/disco-disco-music-disko-dancing-4k-ultra-hd-wallpaper-for-desktop-laptop-tablet-mobile-phones-and-tv-3840×2400-wallpaper-preview.jpg" };
-
-const gameline = { id: 9, categoryId: 3, name: "Gameline", stars: 4, cover: "https://gopos.com.tr/wp-content/uploads/2019/11/Bar-açarken-nelere-dikat-etmeli-1.jpg" };
-const santra = { id: 10, categoryId: 3, name: "Santra Playstation", stars: 5, cover: "https://media-cdn.tripadvisor.com/media/photo-s/19/e8/5e/5f/wave-bar.jpg", };
-const paradise = { id: 11, categoryId: 3, name: "Paradise Okey Salonu", stars: 3, cover: "https://c4.wallpaperflare.com/wallpaper/961/657/229/disco-disco-music-disko-dancing-4k-ultra-hd-wallpaper-for-desktop-laptop-tablet-mobile-phones-and-tv-3840×2400-wallpaper-preview.jpg" };
-
-
-const bars: PlaceCardProps[] = [maison, kumbarahall, restplus];
-const restaurants: PlaceCardProps[] = [efsanepide, kebapciokkes, kofteciyusuf];
-const pubs: PlaceCardProps[] = [kukla, momo, hollystone];
-const gameSaloons: PlaceCardProps[] = [gameline, santra, paradise];
-
-export const allPlaces = [bars, restaurants, pubs, gameSaloons]
-
-const bar = { id: 0, name: "Bar", cover: "https://c4.wallpaperflare.com/wallpaper/961/657/229/disco-disco-music-disko-dancing-4k-ultra-hd-wallpaper-for-desktop-laptop-tablet-mobile-phones-and-tv-3840×2400-wallpaper-preview.jpg" };
-const restaurant = { id: 1, name: "Restaurant", cover: "https://www.turizmaktuel.com/image-upload/news/dunyada-ilk-restoran-nerede-ve-nasil-kuruldu_1427880420.jpg" };
-const pub = { id: 2, name: "Pub", cover: "https://www.diyetkolik.com/site_media/media/customvideo_images/glutensiz_bira_nedir___1.jpg" };
-const gameSaloon = { id: 3, name: "Game Saloon", cover: "https://trthaberstatic.cdn.wp.trt.com.tr/resimler/1714000/bilardo-aa-1715440.jpg" };
-
-export const categories: CategoryCardProps[] = [bar, restaurant, pub, gameSaloon];
+export const categorizePlaces = (places: PlaceCardProps[]) => {
+    const allPlaces: PlaceCardProps[][] = [[], [], [], []]
+    places.forEach((place) => {
+        const category = place.categoryId;
+        allPlaces[category - 1].push(place);
+    });
+    return allPlaces;
+};
 
 
-export const tableCategories = [
-    { key: '0', value: 'Bahçe' },
-    { key: '1', value: 'Salon' },
-    { key: '2', value: 'Teras' },
-    { key: '3', value: 'Loca' }
+export const getRestaurantDetails = async ({ restaurantId }: { restaurantId: number }): Promise<DetailedPlace> => {
+    try {
+        const response = await axios.get(`${BASE_URL}/api/restaurant/${restaurantId}`)
+        const detailedRestarant = response.data.data
+        return {
+            id: detailedRestarant.id,
+            name: detailedRestarant.name,
+            address: detailedRestarant.address,
+            image: detailedRestarant.image[0] ? [
+                formatImageUrl(detailedRestarant.image[0].image_cover),
+                formatImageUrl(detailedRestarant.image[0].image1),
+                formatImageUrl(detailedRestarant.image[0].image2),
+                formatImageUrl(detailedRestarant.image[0].image3),
+                formatImageUrl(detailedRestarant.image[0].image4)
+            ] : ["https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/2048px-No_image_available.svg.png", null, null, null, null],
+            reviews: detailedRestarant.reviews
+        }
+    } catch (error) {
+        console.log("detaild", error)
+        throw error
+    } {
+
+    }
+}
+
+
+export const statusList = [
+    {
+        "id": 1,
+        "name": "Pending",
+        "color": 'yellow'
+    },
+    {
+        "id": 2,
+        "name": "Approved",
+        "color": 'green'
+    },
+    {
+        "id": 3,
+        "name": "Canceled",
+        "color": 'red'
+    },
+    {
+        "id": 4,
+        "name": "Expired",
+        "color": 'gray'
+    },
+    {
+        "id": 5,
+        "name": "Completed",
+        "color": 'green'
+    }
 ]

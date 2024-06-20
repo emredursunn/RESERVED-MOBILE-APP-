@@ -9,17 +9,15 @@ export type FavoriteStackParams = {
     DetailedPlace: {
         id: number
     },
-    Reservations: undefined
 }
 
 const FavoriteStack = createNativeStackNavigator<FavoriteStackParams>()
 
 const FavoriteStackNav = () => {
     return (
-        <FavoriteStack.Navigator initialRouteName='Favorites' screenOptions={{ headerShown: false }}>
+        <FavoriteStack.Navigator initialRouteName='Favorites'  screenOptions={{headerShown:true, headerStyle:{backgroundColor:'#f0a202'}, headerTitleAlign:'center'}}>
             <FavoriteStack.Screen name='Favorites' component={Favorites} />
-            <FavoriteStack.Screen name='DetailedPlace' component={DetailedPlace} />
-            <FavoriteStack.Screen name='Reservations' component={Reservations} />
+            <FavoriteStack.Screen name='DetailedPlace' component={DetailedPlace} options={{headerTitle:'Venue'}} />
         </FavoriteStack.Navigator>
     )
 }

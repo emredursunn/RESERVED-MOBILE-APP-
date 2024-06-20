@@ -1,7 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import Home from "../screens/CustomerScreens/Home"
 import DetailedPlace from "../screens/CustomerScreens/DetailedPlace"
-import Profile from "../screens/CustomerScreens/Profile"
 import Search from "../screens/CustomerScreens/Search"
 import AuthStackNav from "./AuthStackNav"
 import LoginScreen from "../screens/AuthScreens/Login"
@@ -12,10 +11,11 @@ export type HomeStackParams = {
   DetailedPlace: {
     id: number
   },
-  Menu: undefined,
-  Profile: undefined,
+  Menu: {
+    restaurantId:number
+  },
   Search: {
-    search: string
+    search: string | null
   },
   Login: undefined
 }
@@ -24,11 +24,10 @@ const HomeStack = createNativeStackNavigator<HomeStackParams>()
 
 const HomeStackNav = () => {
   return (
-    <HomeStack.Navigator initialRouteName='Home' screenOptions={{ headerShown: false }}>
-      <HomeStack.Screen name='Home' component={Home} />
-      <HomeStack.Screen name='DetailedPlace' component={DetailedPlace} />
+    <HomeStack.Navigator initialRouteName='Home' screenOptions={{headerShown:true, headerStyle:{backgroundColor:'#f0a202'}, headerTitleAlign:'center'}}>
+      <HomeStack.Screen name='Home' component={Home} options={{headerShown:false}} />
+      <HomeStack.Screen name='DetailedPlace' component={DetailedPlace} options={{headerTitle:'Venue'}} />
       <HomeStack.Screen name='Menu' component={Menu} />
-      <HomeStack.Screen name='Profile' component={Profile} />
       <HomeStack.Screen name='Search' component={Search} />
       <HomeStack.Screen name='Login' component={LoginScreen} />
     </HomeStack.Navigator>

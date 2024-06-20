@@ -21,7 +21,7 @@ const AdminStack = createNativeStackNavigator<AdminStackParams>()
 
 const AdminStackNav = () => {
     return (
-            <AdminStack.Navigator initialRouteName='Panel' screenOptions={{headerShown:false}}>
+            <AdminStack.Navigator initialRouteName='Panel' screenOptions={{headerShown:true, headerStyle:{backgroundColor:'#f0a202'}}}>
                 <AdminStack.Screen name='Panel' component={AdminPanel}  />
                 <AdminStack.Screen name='Settings' component={AdminSettings} />
                 <AdminStack.Screen name='PhotoGallery' component={AdminPhotoGallery} />
